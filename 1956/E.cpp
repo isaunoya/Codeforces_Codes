@@ -59,7 +59,6 @@ void solve() {
   int shift = zero;
   vi b(n);
   rep(i, n) b[i] = a[(i + shift) % n];
-  // debug(a, b, shift);
   for (int i = 0, j = 0; i < n; i = j) {
     if (b[i] == 0) {
       j = i + 1;

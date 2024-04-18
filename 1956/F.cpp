@@ -33,9 +33,53 @@ const ll LNF = 1000000000000000000;
 #define fi first
 #define se second
 #endif
+struct unionfind {
+  vector<int> p;
+  unionfind(int N) { p = vector<int>(N, -1); }
+  int root(int x) { return p[x] < 0 ? x : p[x] = root(p[x]); }
+  bool same(int x, int y) { return root(x) == root(y); }
+  void unite(int x, int y) {
+    x = root(x);
+    y = root(y);
+    if (x != y) {
+      if (p[x] < p[y]) {
+        swap(x, y);
+      }
+      p[y] += p[x];
+      p[x] = y;
+    }
+  }
+  int size(int x) { return -p[root(x)]; }
+};
 
 void solve() {
-  
+  int N;
+  cin>>N;
+  vi X(N),Y(N);
+  rep(i,N)cin>>X[i]>>Y[i];
+  vi dfn(N*2,-1),f(N*2),idx(N*2);
+  auto add=[&](int layer,int x,int y,int id){
+    while(x<N*2){
+      if(dfn[x]!=layer){
+        dfn[x]=layer;
+        f[x]=-1e9;
+      }
+      if(y>=f[x]){
+        f[x]=y;
+        idx[x]=id;
+      }
+      x+=x&-x;
+    }
+  };
+  auto get=[&](int layer,int x,int y,int id){
+    while(x){
+
+      x&=x-1;
+    }
+  };
+  rep(i,N){
+
+  }
 }
 
 int main() {
