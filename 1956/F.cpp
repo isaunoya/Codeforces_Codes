@@ -1,94 +1,116 @@
-#if defined(LOCAL)
-#include <D:/cp/templates/my_template_compiled.hpp>
-#else
-#pragma GCC optimize("Ofast,unroll-loops")
 #include <bits/stdc++.h>
-#define debug(...) 42
-#define rep1(a) for (auto i = 0; i < a; i++)
-#define rep2(i, a) for (auto i = 0; i < a; i++)
-#define rep3(i, a, b) for (auto i = a; i < b; i++)
-#define rep4(i, a, b, c) for (auto i = a; i < b; i += c)
-#define overload4(a, b, c, d, e, ...) e
-#define rep(...) overload4(__VA_ARGS__, rep4, rep3, rep2, rep1)(__VA_ARGS__)
 
-#define pb emplace_back
-using namespace std;
-template <typename T, typename T2> void cmin(T &x, const T2 &y) {
-  x = x < y ? x : y;
-}
-template <typename T, typename T2> void cmax(T &x, const T2 &y) {
-  x = x > y ? x : y;
-}
-template <typename T> using vc = vector<T>;
-using ll = long long;
-using vi = vector<int>;
-using vl = vector<ll>;
-using pii = pair<int, int>;
-using pll = pair<ll, ll>;
-mt19937 rng(time(NULL));
-const int INF = 1000000000;
-const ll LNF = 1000000000000000000;
-#define sz(x) int((x).size())
-#define all(x) begin(x), end(x)
-#define fi first
-#define se second
-#endif
-struct unionfind {
-  vector<int> p;
-  unionfind(int N) { p = vector<int>(N, -1); }
-  int root(int x) { return p[x] < 0 ? x : p[x] = root(p[x]); }
-  bool same(int x, int y) { return root(x) == root(y); }
-  void unite(int x, int y) {
-    x = root(x);
-    y = root(y);
-    if (x != y) {
-      if (p[x] < p[y]) {
-        swap(x, y);
-      }
-      p[y] += p[x];
-      p[x] = y;
-    }
+using i64 = long long;
+struct DSU {
+  std::vector<int> f, siz;
+
+  DSU() {}
+  DSU(int n) { init(n); }
+
+  void init(int n) {
+    f.resize(n);
+    std::iota(f.begin(), f.end(), 0);
+    siz.assign(n, 1);
   }
-  int size(int x) { return -p[root(x)]; }
+
+  int find(int x) {
+    while (x != f[x]) {
+      x = f[x] = f[f[x]];
+    }
+    return x;
+  }
+
+  bool same(int x, int y) { return find(x) == find(y); }
+
+  bool merge(int x, int y) {
+    x = find(x);
+    y = find(y);
+    if (x == y) {
+      return false;
+    }
+    siz[x] += siz[y];
+    f[y] = x;
+    return true;
+  }
+
+  int size(int x) { return siz[find(x)]; }
 };
-
 void solve() {
-  int N;
-  cin>>N;
-  vi X(N),Y(N);
-  rep(i,N)cin>>X[i]>>Y[i];
-  vi dfn(N*2,-1),f(N*2),idx(N*2);
-  auto add=[&](int layer,int x,int y,int id){
-    while(x<N*2){
-      if(dfn[x]!=layer){
-        dfn[x]=layer;
-        f[x]=-1e9;
-      }
-      if(y>=f[x]){
-        f[x]=y;
-        idx[x]=id;
-      }
-      x+=x&-x;
-    }
-  };
-  auto get=[&](int layer,int x,int y,int id){
-    while(x){
+  int n;
+  std::cin >> n;
 
-      x&=x-1;
-    }
-  };
-  rep(i,N){
-
+  std::vector<int> l(n), r(n);
+  for (int i = 0; i < n; i++) {
+    std::cin >> l[i] >> r[i];
   }
+
+  std::vector<std::vector<int>> add(n), del(n);
+  for (int i = 0; i < n; i++) {
+    int L = std::max(0, i - r[i]);
+    int R = i - l[i];
+    if (L <= R) {
+      add[L].push_back(i);
+      del[R].push_back(i);
+    }
+    L = i + l[i];
+    R = std::min(n - 1, i + r[i]);
+    if (L <= R) {
+      add[L].push_back(i);
+      del[R].push_back(i);
+    }
+  }
+
+  std::vector<int> cnt(n);
+  std::vector<int> stk;
+  DSU dsu(n);
+  int cntl = 0, cntr = 0;
+  for (int i = 0; i < n; i++) {
+    for (auto j : add[i]) {
+      cnt[dsu.find(j)]++;
+      stk.push_back(dsu.find(j));
+      cntl += (i < j);
+      cntr += (i > j);
+    }
+    if (cntl > 0 && cntr > 0) {
+      int x = -1;
+      for (auto y : stk) {
+        if (cnt[y] > 0) {
+          cnt[y] = 0;
+          if (x == -1) {
+            x = y;
+          } else {
+            dsu.merge(x, y);
+          }
+        }
+      }
+      stk.clear();
+      stk.push_back(x);
+      cnt[x] = cntl + cntr;
+    }
+    for (auto j : del[i]) {
+      cnt[dsu.find(j)]--;
+      cntl -= (i < j);
+      cntr -= (i > j);
+    }
+  }
+
+  int ans = 0;
+  for (int i = 0; i < n; i++) {
+    ans += dsu.find(i) == i;
+  }
+  std::cout << ans << "\n";
 }
 
 int main() {
-  ios::sync_with_stdio(false);
-  cin.tie(nullptr);
-  int t = 1;
-  cin >> t;
+  std::ios::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+
+  int t;
+  std::cin >> t;
+
   while (t--) {
     solve();
   }
+
   return 0;
 }
