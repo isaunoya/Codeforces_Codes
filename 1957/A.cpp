@@ -42,6 +42,7 @@ void solve() {
     int x;
     cin >> x;
     mp[x] += 1;
+    
   }
   int ans = 0;
   for (auto [x, y] : mp) {
