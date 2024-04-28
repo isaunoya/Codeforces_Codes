@@ -35,7 +35,6 @@ const ll LNF = 1000000000000000000;
 #endif
 
 void solve() {
-  
 }
 
 int main() {
