@@ -65,7 +65,6 @@ void solve() {
   for (int i = p; i <= N; i++) {
     if (dp[i] < INF) {
       S.reset();
-      int cnt = 0;
       for (int j = i + 2; j <= N; j += 2) {
         S.flip(A[j - 2]);
         S.flip(A[j - 1]);
@@ -75,7 +74,6 @@ void solve() {
           if (layer[u][v] < i) {
             layer[u][v] = i;
             cmin(dp[j], dp[i] + 1);
-            cnt++;
           }
         }
       }
