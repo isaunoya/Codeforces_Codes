@@ -35,14 +35,73 @@ const ll LNF = 1000000000000000000;
 #endif
 
 void solve() {
-  
+  int N, K;
+  cin >> N >> K;
+  vi A(N);
+  rep(i, N) cin >> A[i], --A[i];
+  bitset<1000> S;
+  int p = 2;
+  while (p <= N) {
+    S.flip(A[p - 2]);
+    S.flip(A[p - 1]);
+    if ((int)S.count() == K) {
+      break;
+    }
+    p += 2;
+  }
+  if (p > N) {
+    int all = N / 2;
+    int rem = (int)S.count() / 2;
+    // all even
+    cout << all - rem << "\n";
+    return;
+  }
+
+  vc<vi> layer(N, vi(N, -1));
+  vi dp(N + 1, INF);
+  dp[p] = 1;
+
+  int ans = 0;
+  for (int i = p; i <= N; i++) {
+    if (dp[i] < INF) {
+      S.reset();
+      int cnt = 0;
+      for (int j = i + 2; j <= N; j += 2) {
+        S.flip(A[j - 2]);
+        S.flip(A[j - 1]);
+        if ((int)S.count() == 2) {
+          int u = S._Find_first();
+          int v = S._Find_next(u);
+          if (layer[u][v] < i) {
+            layer[u][v] = i;
+            cmin(dp[j], dp[i] + 1);
+            cnt++;
+          }
+        }
+      }
+      array<bool, 3> C{};
+      rep(u, K) {
+        int fu = S.test(u);
+        rep(v, u + 1, K) if (layer[u][v] < i) {
+          int fv = S.test(v);
+          C[fu + fv] = 1;
+        }
+      }
+      int pc = S.count();
+      rep(c, 3) if (C[c]) {
+        cmax(ans, N / 2 - dp[i] - (K - (pc + 2 - 2 * c)) / 2);
+      }
+    }
+  }
+
+  cout << ans << "\n";
 }
 
 int main() {
   ios::sync_with_stdio(false);
   cin.tie(nullptr);
   int t = 1;
-  cin >> t;
+  // cin >> t;
   while (t--) {
     solve();
   }
