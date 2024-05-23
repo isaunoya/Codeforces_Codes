@@ -1,3 +1,4 @@
+
 #if defined(LOCAL)
 #include <D:/cp/templates/my_template_compiled.hpp>
 #else
