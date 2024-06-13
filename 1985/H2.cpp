@@ -1,7 +1,6 @@
 #if defined(LOCAL)
 #include <D:/cp/templates/my_template_compiled.hpp>
 #else
-#pragma GCC target("avx2,popcnt")
 #pragma GCC optimize("Ofast,unroll-loops")
 #include <bits/stdc++.h>
 #define debug(...) 42
@@ -35,201 +34,93 @@ const ll LNF = 1000000000000000000;
 #define se second
 #endif
 
-struct unionfind {
-  vector<int> p;
-  unionfind(int N) { p = vector<int>(N, -1); }
-  int root(int x) { return p[x] < 0 ? x : p[x] = root(p[x]); }
-  bool same(int x, int y) { return root(x) == root(y); }
-  void unite(int x, int y) {
-    x = root(x);
-    y = root(y);
-    if (x != y) {
-      if (p[x] < p[y]) {
-        swap(x, y);
-      }
-      p[y] += p[x];
-      p[x] = y;
-    }
-  }
-  int size(int x) { return -p[root(x)]; }
-};
-
 void solve() {
   int N, M;
   cin >> N >> M;
   vc<string> S(N);
   rep(i, N) cin >> S[i];
-  unionfind f(N * M);
   auto id = [&](int i, int j) { return i * M + j; };
+  vi p(N * M, -1), lx(N * M), rx(N * M), ly(N * M), ry(N * M), s(N * M);
+  auto ok = [&](int i, int j) {
+    return 0 <= i && i < N && 0 <= j && j < M && S[i][j] == '#';
+  };
 
-  rep(i, N) {
-    rep(j, M) {
-      if (S[i][j] == '#') {
+  rep(x, N) {
+    rep(y, M) {
+      if (S[x][y] == '.')
+        continue;
+      int k = id(x, y);
+      if (p[k] != -1)
+        continue;
+      p[k] = k;
+      vi q{k};
+      lx[k] = rx[k] = x;
+      ly[k] = ry[k] = y;
+      rep(t, sz(q)) {
+        int u = q[t];
+        int i = u / M;
+        int j = u % M;
+        cmin(lx[k], i), cmax(rx[k], i);
+        cmin(ly[k], j), cmax(ry[k], j);
         for (int dx = -1; dx <= 1; dx++) {
           for (int dy = -1; dy <= 1; dy++) {
             if (dx * dx + dy * dy == 1) {
-              int ni = i + dx;
-              int nj = j + dy;
-              if (0 <= ni && ni < N && 0 <= nj && nj < M && S[ni][nj] == '#') {
-                f.unite(id(i, j), id(ni, nj));
+              int i2 = i + dx;
+              int j2 = j + dy;
+              if (ok(i2, j2)) {
+                int v = id(i2, j2);
+                if (p[v] == -1) {
+                  p[v] = k;
+                  q.pb(v);
+                }
               }
             }
           }
         }
       }
+      s[k] = sz(q);
     }
   }
 
-  vc<vi> f1;
-  vi add(N);
+  vc<vi> SUM(N + 1, vi(M + 1, 0));
+
+  auto add = [&](int i1, int j1, int i2, int j2, int v) {
+    i1 = clamp(i1, 0, N - 1);
+    i2 = clamp(i2, 0, N - 1);
+    j1 = clamp(j1, 0, M - 1);
+    j2 = clamp(j2, 0, M - 1);
+
+    i2++, j2++;
+    SUM[i1][j1] += v;
+    SUM[i1][j2] -= v;
+    SUM[i2][j1] -= v;
+    SUM[i2][j2] += v;
+  };
+
+  rep(i, N) rep(j, M) {
+    int k = id(i, j);
+    if (p[k] == k) {
+      add(lx[k] - 1, 0, rx[k] + 1, M - 1, s[k]);
+      add(0, ly[k] - 1, N - 1, ry[k] + 1, s[k]);
+      add(lx[k] - 1, ly[k] - 1, rx[k] + 1, ry[k] + 1, -s[k]);
+    }
+  }
+
+  vi adx(N), ady(M);
+  rep(i, N) rep(j, M) {
+    if (S[i][j] == '.') {
+      ++adx[i];
+      ++ady[j];
+    }
+  }
+  rep(i, N + 1) rep(j, M) SUM[i][j + 1] += SUM[i][j];
+  rep(i, N) rep(j, M + 1) SUM[i + 1][j] += SUM[i][j];
+
+  // debug(SUM);
   int ans = 0;
-  vi oc(N * M);
-  rep(i, N) {
-    vi v;
-    int cur = 0;
-    rep(j, M) {
-      if (S[i][j] == '#') {
-        int F = f.root(id(i, j));
-        if (!oc[F]) {
-          oc[F] = 1;
-          cur += f.size(F);
-          v.pb(F);
-        }
-      } else {
-        add[i]++;
-        cur++;
-        for (int dx = -1; dx <= 1; dx++) {
-          for (int dy = -1; dy <= 1; dy++) {
-            if (dx * dx + dy * dy == 1) {
-              int ni = i + dx;
-              int nj = j + dy;
-              if (0 <= ni && ni < N && 0 <= nj && nj < M && S[ni][nj] == '#') {
-
-                int F = f.root(id(ni, nj));
-                if (!oc[F]) {
-                  oc[F] = 1;
-                  cur += f.size(F);
-                  v.pb(F);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    f1.pb(v);
+  rep(i, N) rep(j, M) {
+    int cur = SUM[i][j] + adx[i] + ady[j] - (S[i][j] == '.');
     cmax(ans, cur);
-
-    for (auto F : v)
-      oc[F] = 0;
-  }
-
-  vi add2(M);
-  vc<vi> f2;
-  rep(j, M) {
-    vi v;
-    int cur = 0;
-    rep(i, N) {
-      if (S[i][j] == '#') {
-        int F = f.root(id(i, j));
-        if (!oc[F]) {
-          oc[F] = 1;
-          cur += f.size(F);
-          v.pb(F);
-        }
-      } else {
-        add2[j]++;
-        cur++;
-        for (int dx = -1; dx <= 1; dx++) {
-          for (int dy = -1; dy <= 1; dy++) {
-            if (dx * dx + dy * dy == 1) {
-              int ni = i + dx;
-              int nj = j + dy;
-              if (0 <= ni && ni < N && 0 <= nj && nj < M && S[ni][nj] == '#') {
-                int F = f.root(id(ni, nj));
-                if (!oc[F]) {
-                  oc[F] = 1;
-                  cur += f.size(F);
-                  v.pb(F);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    f2.pb(v);
-
-    cmax(ans, cur);
-    for (auto F : v)
-      oc[F] = 0;
-  }
-
-  vi s(N * M);
-  rep(i, N * M) s[i] = f.size(i);
-
-  if (N < M) {
-    int cur = 0;
-    rep(i, N) {
-      for (auto k : f1[i]) {
-        oc[k]++;
-        if (oc[k] == 1) {
-          cur += s[k];
-        }
-      }
-      rep(j, M) {
-        for (auto k : f2[j]) {
-          oc[k]++;
-          if (oc[k] == 1) {
-            cur += s[k];
-          }
-        }
-        cmax(ans, cur + add[i] + add2[j] - (S[i][j] == '.'));
-        for (auto k : f2[j]) {
-          oc[k]--;
-          if (oc[k] == 0) {
-            cur -= s[k];
-          }
-        }
-      }
-      for (auto k : f1[i]) {
-        oc[k]--;
-        if (oc[k] == 0) {
-          cur -= s[k];
-        }
-      }
-    }
-  } else {
-    int cur = 0;
-    rep(j, M) {
-      for (auto k : f2[j]) {
-        oc[k]++;
-        if (oc[k] == 1) {
-          cur += s[k];
-        }
-      }
-      rep(i, N) {
-        for (auto k : f1[i]) {
-          oc[k]++;
-          if (oc[k] == 1) {
-            cur += s[k];
-          }
-        }
-        cmax(ans, cur + add[i] + add2[j] - (S[i][j] == '.'));
-        for (auto k : f1[i]) {
-          oc[k]--;
-          if (oc[k] == 0) {
-            cur -= s[k];
-          }
-        }
-      }
-      for (auto k : f2[j]) {
-        oc[k]--;
-        if (oc[k] == 0) {
-          cur -= s[k];
-        }
-      }
-    }
   }
   cout << ans << "\n";
 }
