@@ -34,8 +34,91 @@ const ll LNF = 1000000000000000000;
 #define se second
 #endif
 
+#include <atcoder/dsu>
+
+const int N = 1e6 + 5;
+int M[N];
+auto init = []() {
+  rep(i, N) M[i] = i;
+  for (int i = 2; i < N; i++) {
+    if (M[i] == i) {
+      for (int j = i * 2; j < N; j += i) {
+        M[j] = i;
+      }
+    }
+  }
+  return 0;
+}();
+
+int vis[N];
+vi v[N];
 void solve() {
-  
+  int N, K;
+  cin >> N >> K;
+  using namespace atcoder;
+  dsu F(N+N);
+  auto factor = [&](int X) {
+    vi p;
+    while (X > 1) {
+      if (p.empty() || M[X] != p.back())
+        p.pb(M[X]);
+      X /= M[X];
+    }
+    return p;
+  };
+  vi A(N);
+  vi cand;
+  rep(i, N) {
+    int X;
+    cin >> X;
+    A[i] = X;
+    auto p = factor(X);
+    // debug(X, p);
+    for (auto j : p) {
+      v[j].pb(i);
+      if (!vis[j]) {
+        vis[j] = 1;
+        cand.pb(j);
+      }
+    }
+  }
+  for (auto c : cand) {
+    vi cur;
+    for (auto i : v[c]) {
+      if (i != 0)
+        cur.pb(i);
+    }
+    for (auto i : v[c]) {
+      cur.pb(i+N);
+    }
+    rep(i, sz(cur)-1) {
+      int x = cur[i], y = cur[i+1];
+      if (y-x <= K) {
+        F.merge(x, y);
+      }
+    }
+  }
+  ll ans = 0;
+  rep(i, 1, N+N) {
+    if (F.leader(i) == i) {
+      ans += 1;
+    }
+  }
+  rep(i, N) {
+    if (A[i] == 1) {
+      if (i > 0) {
+        ans += N-2;
+      } else {
+        ans += N-1;
+      }
+    } 
+  }
+  cout << ans << "\n";
+
+  for (auto c : cand) {
+    vis[c] = 0;
+    v[c].clear();
+  }
 }
 
 int main() {
