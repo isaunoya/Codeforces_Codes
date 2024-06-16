@@ -104,6 +104,8 @@ struct HLD {
 
   int distance(int x, int y) { return d[x] + d[y] - 2 * d[lca(x, y)]; }
 };
+
+
 using S = pair<int, int>;
 using F = int;
 
