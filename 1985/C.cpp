@@ -36,19 +36,20 @@ const ll LNF = 1000000000000000000;
 
 void solve() {
   int N;
-  cin>>N;
-  vi A(N);rep(i,N)cin>>A[i];
-  map<ll,int>oc;
-  ll s=0;
-  int ans=0;
-  rep(i,N){
-    s+=A[i];
-    oc[A[i]]=1;
-    if(s%2==0&&oc.count(s/2)){
+  cin >> N;
+  vi A(N);
+  rep(i, N) cin >> A[i];
+  map<ll, int> oc;
+  ll s = 0;
+  int ans = 0;
+  rep(i, N) {
+    s += A[i];
+    oc[A[i]] = 1;
+    if (s % 2 == 0 && oc.count(s / 2)) {
       ans++;
     }
   }
-  cout<<ans<<"\n";
+  cout << ans << "\n";
 }
 
 int main() {
