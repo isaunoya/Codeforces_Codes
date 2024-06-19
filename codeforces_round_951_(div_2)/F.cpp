@@ -34,8 +34,49 @@ const ll LNF = 1000000000000000000;
 #define se second
 #endif
 
+using p = array<int, 2>;
+
+p query(int a) {
+  a = max(a, 0);
+  cout << "? " << a << endl;
+  int x, y;
+  cin >> x >> y;
+  return p{x, y};
+}
+
 void solve() {
-  
+  deque<int> ans;
+  auto calc = [&](auto &calc, int N) -> void {
+    if (N == 0) {
+      return;
+    }
+    p cur = query(N-2);
+    if (N == 1) {
+      ans.pb(cur[0]);
+    } else {
+      if (cur[1]) {
+        calc(calc, N - 1);
+        if (ans.back() != cur[1]) {
+          ans.pb(cur[0]);
+        } else {
+          ans.push_front(cur[0]);
+        }
+      } else {
+        p q = query(0);
+        calc(calc, N-2);
+        ans.pb(cur[0]);
+        ans.pb(q[0]);
+      }
+    }
+  };
+  int N;
+  cin >> N;
+  calc(calc, N);
+  cout << "! ";
+  for (auto i : ans) {
+    cout << i << " ";
+  }
+  cout << endl;
 }
 
 int main() {
