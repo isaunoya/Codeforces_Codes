@@ -34,6 +34,20 @@ const ll LNF = 1000000000000000000;
 #define se second
 #endif
 
+template <class Fun> class y_combinator_result {
+  Fun fun_;
+
+public:
+  template <class T>
+  explicit y_combinator_result(T &&fun) : fun_(std::forward<T>(fun)) {}
+  template <class... Args> decltype(auto) operator()(Args &&...args) {
+    return fun_(std::ref(*this), std::forward<Args>(args)...);
+  }
+};
+template <class Fun> decltype(auto) y_combinator(Fun &&fun) {
+  return y_combinator_result<std::decay_t<Fun>>(std::forward<Fun>(fun));
+}
+
 using p = array<int, 2>;
 
 p query(int a) {
@@ -46,16 +60,18 @@ p query(int a) {
 
 void solve() {
   deque<int> ans;
-  auto calc = [&](auto &calc, int N) -> void {
+  int N;
+  cin >> N;
+  y_combinator([&](auto calc, int N) -> void {
     if (N == 0) {
       return;
     }
-    p cur = query(N-2);
+    p cur = query(N - 2);
     if (N == 1) {
       ans.pb(cur[0]);
     } else {
       if (cur[1]) {
-        calc(calc, N - 1);
+        calc(N - 1);
         if (ans.back() != cur[1]) {
           ans.pb(cur[0]);
         } else {
@@ -63,15 +79,12 @@ void solve() {
         }
       } else {
         p q = query(0);
-        calc(calc, N-2);
+        calc(N - 2);
         ans.pb(cur[0]);
         ans.pb(q[0]);
       }
     }
-  };
-  int N;
-  cin >> N;
-  calc(calc, N);
+  })(N);
   cout << "! ";
   for (auto i : ans) {
     cout << i << " ";
