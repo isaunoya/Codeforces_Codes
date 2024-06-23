@@ -44,7 +44,7 @@ void solve() {
   cin >> n >> m;
   vc<vi> g(n);
   dsu f(n);
-  vi v(n);
+  vc<ull> v(n);
   vc<pii> edge;
   rep(i, m) {
     int a, b;
