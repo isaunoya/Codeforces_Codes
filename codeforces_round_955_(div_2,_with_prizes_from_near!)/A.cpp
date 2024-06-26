@@ -25,65 +25,26 @@ using vi = vector<int>;
 using vl = vector<ll>;
 using pii = pair<int, int>;
 using pll = pair<ll, ll>;
-// mt19937 rng(time(NULL));
+mt19937 rng(time(NULL));
 const int INF = 1000000000;
 const ll LNF = 1000000000000000000;
 #define sz(x) int((x).size())
 #define all(x) begin(x), end(x)
 #define fi first
 #define se second
-mt19937_64 rng(time(0));
 #endif
 
-#include <atcoder/dsu>
-using namespace atcoder;
-using ull = unsigned long long;
-
 void solve() {
-  int n, m;
-  cin >> n >> m;
-  vc<vi> g(n);
-  dsu f(n);
-  vc<ull> v(n);
-  vc<pii> edge;
-  rep(i, m) {
-    int a, b;
-    cin >> a >> b;
-    --a;
-    --b;
-    if (!f.same(a, b)) {
-      f.merge(a, b);
-      g[a].pb(b);
-      g[b].pb(a);
-    } else {
-      edge.pb(a, b);
-    }
-  }
-  for (auto [a, b] : edge) {
-    ull t = rng();
-    v[a] ^= t;
-    v[b] ^= t;
-  }
-  ll ans = 1ll * n * (n - 1) / 2;
-  ll dec = 0;
-  vl s(n);
-  auto dfs = [&](auto &dfs, int u, int p) -> void {
-    s[u] = 1;
-    for (auto vv : g[u]) {
-      if (vv == p) {
-        continue;
-      }
-      dfs(dfs, vv, u);
-      s[u] += s[vv];
-      v[u] ^= v[vv];
-    }
-    if (v[u] == 0) {
-      cmax(dec, s[u] * (n - s[u]));
-    }
-  };
+  int x1, y1, x2, y2;
+  cin >> x1 >> y1 >> x2 >> y2;
 
-  dfs(dfs, 0, -1);
-  cout << ans - dec << "\n";
+  if (x1 <= y1 && y2 <= x2) {
+    cout << "NO\n";
+  } else if (y1 <= x1 && x2 <= y2) {
+    cout << "NO\n";
+  } else {
+    cout << "YES\n";
+  }
 }
 
 int main() {

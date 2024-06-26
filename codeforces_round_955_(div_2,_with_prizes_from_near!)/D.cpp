@@ -25,65 +25,53 @@ using vi = vector<int>;
 using vl = vector<ll>;
 using pii = pair<int, int>;
 using pll = pair<ll, ll>;
-// mt19937 rng(time(NULL));
+mt19937 rng(time(NULL));
 const int INF = 1000000000;
 const ll LNF = 1000000000000000000;
 #define sz(x) int((x).size())
 #define all(x) begin(x), end(x)
 #define fi first
 #define se second
-mt19937_64 rng(time(0));
 #endif
 
-#include <atcoder/dsu>
-using namespace atcoder;
-using ull = unsigned long long;
-
 void solve() {
-  int n, m;
-  cin >> n >> m;
-  vc<vi> g(n);
-  dsu f(n);
-  vc<ull> v(n);
-  vc<pii> edge;
-  rep(i, m) {
-    int a, b;
-    cin >> a >> b;
-    --a;
-    --b;
-    if (!f.same(a, b)) {
-      f.merge(a, b);
-      g[a].pb(b);
-      g[b].pb(a);
-    } else {
-      edge.pb(a, b);
-    }
+  int N, M, K;
+  cin >> N >> M >> K;
+  vc<vi> A(N, vi(M));
+  rep(i, N) rep(j, M) cin >> A[i][j];
+  vc<vi> B(N, vi(M));
+  rep(i, N) {
+    string S;
+    cin >> S;
+    rep(j, M) B[i][j] = S[j] - '0';
   }
-  for (auto [a, b] : edge) {
-    ull t = rng();
-    v[a] ^= t;
-    v[b] ^= t;
-  }
-  ll ans = 1ll * n * (n - 1) / 2;
-  ll dec = 0;
-  vl s(n);
-  auto dfs = [&](auto &dfs, int u, int p) -> void {
-    s[u] = 1;
-    for (auto vv : g[u]) {
-      if (vv == p) {
-        continue;
-      }
-      dfs(dfs, vv, u);
-      s[u] += s[vv];
-      v[u] ^= v[vv];
-    }
-    if (v[u] == 0) {
-      cmax(dec, s[u] * (n - s[u]));
-    }
+  vc<vi> SUM(N + 1, vi(M + 1));
+  rep(i, N) rep(j, M) SUM[i + 1][j + 1] = B[i][j] ? 1 : -1;
+  rep(i, N + 1) rep(j, M + 1) if (j + 1 <= M) SUM[i][j + 1] += SUM[i][j];
+  rep(i, N + 1) rep(j, M + 1) if (i + 1 <= N) SUM[i + 1][j] += SUM[i][j];
+  auto calc = [&](int a, int b, int c, int d) { //[a,c)*[b,d)
+    return SUM[c][d] - SUM[a][d] - SUM[c][b] + SUM[a][b];
   };
-
-  dfs(dfs, 0, -1);
-  cout << ans - dec << "\n";
+  ll D = 0;
+  rep(i, N) rep(j, M) {
+    if (B[i][j])
+      D += A[i][j];
+    else
+      D -= A[i][j];
+  }
+  ll g = 0;
+  rep(i, N) rep(j, M) {
+    if (i + K > N || j + K > M)
+      break;
+    g = gcd(g, abs(calc(i, j, i + K, j + K)));
+  }
+  if (D == 0) {
+    cout << "YES\n";
+  } else if (g && D % g == 0) {
+    cout << "YES\n";
+  } else {
+    cout << "NO\n";
+  }
 }
 
 int main() {
