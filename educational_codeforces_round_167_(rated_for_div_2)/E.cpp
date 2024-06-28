@@ -34,25 +34,26 @@ const ll LNF = 1000000000000000000;
 #define se second
 #endif
 
-#include<atcoder/modint>
+#include <atcoder/modint>
 
-using mint=atcoder::modint998244353;
-const int N=2e5+5,K=11;
-mint dp[N][K],sum[K];
+using mint = atcoder::modint998244353;
+const int N = 2e5 + 5, K = 11;
+mint dp[N][K], sum[K];
 void solve() {
-  int n,k;cin>>n>>k;
-  dp[0][0]=1;
-  rep(i,n){
-    rep(j,k+1)sum[j]+=dp[i][j];
-    rep(j,k+1){
-      int nj=min(j+1,k);
-      dp[i+1][nj]+=sum[j];
-      if(1<i&&i+1<n){
-        dp[i+1][nj]-=dp[i-1][j];
+  int n, k;
+  cin >> n >> k;
+  dp[0][0] = 1;
+  rep(i, n) {
+    rep(j, k + 1) sum[j] += dp[i][j];
+    rep(j, k + 1) {
+      int nj = min(j + 1, k);
+      dp[i + 1][nj] += sum[j];
+      if (1 < i && i + 1 < n) {
+        dp[i + 1][nj] -= dp[i - 1][j];
       }
     }
   }
-  cout<<dp[n][k].val()<<"\n";
+  cout << dp[n][k].val() << "\n";
 }
 
 int main() {

@@ -37,8 +37,10 @@ const ll LNF = 1000000000000000000;
 void solve() {
   int n;
   cin >> n;
-  vi a(n); rep(i, n) cin >> a[i];
-  vi b(n); rep(i, n) cin >> b[i];
+  vi a(n);
+  rep(i, n) cin >> a[i];
+  vi b(n);
+  rep(i, n) cin >> b[i];
 
   int x = 0;
   int y = 0;

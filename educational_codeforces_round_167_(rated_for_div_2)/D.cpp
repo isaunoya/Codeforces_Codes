@@ -34,8 +34,9 @@ const ll LNF = 1000000000000000000;
 #define se second
 #endif
 
-int mn[1000001];
-int dp[1000001];
+const int N = 1e6;
+int mn[N * 2 + 1];
+int dp[N * 2 + 1];
 void solve() {
   int n, m;
   cin >> n >> m;
@@ -46,28 +47,24 @@ void solve() {
   vl c(m);
   rep(i, m) cin >> c[i];
 
-  for (int i = 0; i <= 1000000; i++) {
-    mn[i] = INF;
-  }
+  rep(i, N * 2 + 1) { mn[i] = INF; }
   rep(n) cmin(mn[a[i]], a[i] - b[i]);
-  for (int i = 1; i <= 1000000; i++) {
-    cmin(mn[i], mn[i - 1]);
-  }
+  rep(i, N * 2) { cmin(mn[i + 1], mn[i]); }
 
-  for (int i = 1; i <= 1000000; i++) {
+  rep(i, N * 2 + 1) {
     if (i - mn[i] >= 0)
       cmax(dp[i], dp[i - mn[i]] + 2);
   }
 
   ll ans = 0;
   rep(i, m) {
-    int cur = c[i];
-    if (cur <= 1000000) {
+    ll cur = c[i];
+    if (cur <= N * 2) {
       ans += dp[cur];
     } else {
-      ll res = (cur - 1000000) / mn[1000000];
+      ll res = (cur - N) / mn[N];
       ans += res * 2;
-      cur -= res * mn[1000000];
+      cur -= res * mn[N];
       ans += dp[cur];
     }
   }
